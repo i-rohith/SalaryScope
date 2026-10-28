@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SalaryScope</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f4f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            background: #14213d;
+        }
+
+        .stat-card, .section-card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            color: #2456a6;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .quick-link {
+            text-decoration: none;
+            display: block;
+            color: #172033;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #e7ebf2;
+            transition: 0.2s;
+        }
+
+        .quick-link:hover {
+            border-color: #2456a6;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark">
+    <div class="container-fluid px-4">
+        <a href="{% url 'home' %}" class="navbar-brand fw-bold">
+            SalaryScope Admin
+        </a>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin:index' %}" class="btn btn-outline-light btn-sm">
+                Django Admin
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-light btn-sm">
+                Main Website
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Admin Dashboard</h2>
+        <p class="text-secondary mb-0">
+            Monitor SalaryScope users, salary predictions, and activity.
+        </p>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card stat-card h-100">
+                <div class="card-body p-4">
+                    <p class="text-secondary mb-2">Registered Users</p>
+                    <div class="stat-value">{{ total_users }}</div>
+                    <small class="text-muted">Non-staff accounts</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card stat-card h-100">
+                <div class="card-body p-4">
+                    <p class="text-secondary mb-2">Total Predictions</p>
+                    <div class="stat-value">{{ total_predictions }}</div>
+                    <small class="text-muted">Saved database records</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card stat-card h-100">
+                <div class="card-body p-4">
+                    <p class="text-secondary mb-2">Average Predicted Salary</p>
+                    <div class="stat-value">
+                        {% if average_salary != None %}
+                            ₹{{ average_salary|floatformat:2 }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">LPA</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick actions -->
+    <h5 class="fw-bold mb-3">Quick Actions</h5>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <a href="{% url 'manage_users' %}" class="quick-link">
+                <strong>Manage Users</strong>
+                <div class="text-secondary small mt-1">
+                    View and manage registered accounts
+                </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <a href="{% url 'analytics' %}" class="quick-link">
+                <strong>Job Market Analytics</strong>
+                <div class="text-secondary small mt-1">
+                    Explore salary and job market insights
+                </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <a href="{% url 'all_predictions' %}" class="quick-link">
+                <strong>All Predictions</strong>
+                <div class="text-secondary small mt-1">
+                    Open saved prediction records
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-7">
+            <div class="card section-card h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold">Prediction Activity</h5>
+                    <p class="text-secondary small">
+                        Number of saved predictions over the last seven days
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card section-card h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold">Salary Distribution</h5>
+                    <p class="text-secondary small">
+                        Saved predictions grouped by predicted salary
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="salaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Search and date filters -->
+    <div class="card section-card mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Search Predictions</h5>
+
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="q" class="form-label">Username or Job Title</label>
+                    <input
+                        type="text"
+                        id="q"
+                        name="q"
+                        class="form-control"
+                        value="{{ search_query }}"
+                        placeholder="Search..."
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <label for="date_from" class="form-label">From Date</label>
+                    <input
+                        type="date"
+                        id="date_from"
+                        name="date_from"
+                        class="form-control"
+                        value="{{ date_from }}"
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <label for="date_to" class="form-label">To Date</label>
+                    <input
+                        type="date"
+                        id="date_to"
+                        name="date_to"
+                        class="form-control"
+                        value="{{ date_to }}"
+                    >
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button class="btn btn-primary" type="submit">Filter</button>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recent predictions -->
+    <div class="card section-card">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Recent Predictions</h5>
+                    <p class="text-secondary small mb-0">
+                        Latest ten matching registered-user predictions
+                    </p>
+                </div>
+
+                <a href="{% url 'all_predictions' %}"
+                   class="btn btn-primary btn-sm">
+                    View All Predictions
+                </a>
+            </div>
+
+            {% if recent_predictions %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>City</th>
+                                <th>Predicted Salary</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prediction in recent_predictions %}
+                                <tr>
+                                    <td>{{ prediction.user.username }}</td>
+                                    <td class="fw-semibold">{{ prediction.job_title }}</td>
+                                    <td>{{ prediction.company }}</td>
+                                    <td>{{ prediction.city }}</td>
+                                    <td class="text-success fw-bold text-nowrap">
+                                        ₹{{ prediction.predicted_salary|floatformat:2 }} LPA
+                                    </td>
+                                    <td class="text-nowrap">
+                                        {{ prediction.created_at|date:"d M Y, h:i A" }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <h6 class="fw-bold">No predictions available</h6>
+                    <p class="text-secondary mb-0">
+                        No records match your filters.
+                    </p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <footer class="text-center text-secondary py-4">
+        <small>SalaryScope | Administration</small>
+    </footer>
+
+</main>
+
+<script>
+    const activityLabels = JSON.parse('{{ activity_labels_json|escapejs }}');
+    const activityData = JSON.parse('{{ activity_data_json|escapejs }}');
+
+    const salaryLabels = JSON.parse('{{ salary_labels_json|escapejs }}');
+    const salaryData = JSON.parse('{{ salary_data_json|escapejs }}');
+
+    new Chart(document.getElementById("activityChart"), {
+        type: "line",
+        data: {
+            labels: activityLabels,
+            datasets: [{
+                label: "Predictions",
+                data: activityData,
+                borderColor: "#2456a6",
+                backgroundColor: "rgba(36, 86, 166, 0.12)",
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("salaryChart"), {
+        type: "bar",
+        data: {
+            labels: salaryLabels,
+            datasets: [{
+                label: "Predictions",
+                data: salaryData,
+                backgroundColor: "#4d79c7",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

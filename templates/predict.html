@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Prediction | SalaryScope</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .main-card {
+            max-width: 950px;
+            margin: 40px auto;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        .page-heading {
+            color: #173b70;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="card main-card">
+        <div class="card-body p-4 p-md-5">
+
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                &larr; Back to Home
+            </a>
+
+            <h2 class="page-heading mt-3">AI Salary Prediction</h2>
+
+            <p class="text-secondary">
+                Enter job details to estimate the expected annual salary in India.
+            </p>
+
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            {% if guest_prediction and not user.is_authenticated %}
+                {{ guest_prediction|json_script:"guest-prediction-data" }}
+            {% endif %}
+
+            {% if predicted_salary != None and predicted_salary != "" %}
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body p-4">
+                    <h5 class="text-muted">Predicted Annual Salary</h5>
+
+                    <h2 class="text-primary fw-bold">
+                        ₹{{ predicted_salary }} LPA
+                    </h2>
+
+                    {% if lower_salary != None and upper_salary != None %}
+                    <hr>
+
+                    <h6 class="fw-bold">Estimated Salary Range</h6>
+
+                    <h3 class="text-success fw-bold">
+                        ₹{{ lower_salary }} – ₹{{ upper_salary }} LPA
+                    </h3>
+
+                    <span class="badge bg-success-subtle text-success">
+                        {{ interval_level }}% Prediction Interval
+                    </span>
+
+                    <p class="text-muted small mt-3 mb-0">
+                        This range is estimated using historical prediction errors.
+                        It represents a statistical coverage target, not a guaranteed
+                        salary range for an individual job.
+                    </p>
+                    {% endif %}
+
+                    <!-- Added Analytics Button -->
+                    {% if guest_prediction %}
+                    <div>
+                        <a
+                            href="{% url 'analytics' %}?job_title={{ guest_prediction.job_title|urlencode }}&amp;experience_level={{ guest_prediction.experience_level|urlencode }}&amp;predicted_salary={{ guest_prediction.predicted_salary|urlencode }}"
+                            class="btn btn-outline-primary mt-3"
+                        >
+                            View Job Market Analytics
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'predict' %}">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <!-- Job Title -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="job_title">Job Title</label>
+                        <input
+                            class="form-control"
+                            id="job_title"
+                            name="job_title"
+                            placeholder="e.g. Software Engineer"
+                            value="{{ request.POST.job_title|default:'' }}"
+                            required>
+                    </div>
+
+                    <!-- Company -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="company">Company</label>
+                        <input
+                            class="form-control"
+                            id="company"
+                            name="company"
+                            placeholder="Company name (optional)"
+                            value="{{ request.POST.company|default:'Unknown' }}">
+                        <small class="text-secondary">
+                            Leave blank if unknown.
+                        </small>
+                    </div>
+
+                    <!-- Company Type -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="company_type">Company Type</label>
+                        <select class="form-select" id="company_type"
+                                name="company_type" required>
+                            <option value="">Select company type</option>
+                            <option>Startup</option>
+                            <option>Small</option>
+                            <option>Medium</option>
+                            <option>Large</option>
+                            <option>MNC</option>
+                        </select>
+                    </div>
+
+                    <!-- Industry -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="industry">Industry</label>
+                        <select class="form-select" id="industry"
+                                name="industry" required>
+                            <option value="">Select industry</option>
+                            <option>IT Services</option>
+                            <option>Software</option>
+                            <option>Technology</option>
+                            <option>Finance</option>
+                            <option>Healthcare</option>
+                            <option>Manufacturing</option>
+                            <option>E-commerce</option>
+                            <option>Education</option>
+                            <option>Consulting</option>
+                            <option>Telecommunications</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- City -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="city">City</label>
+                        <input
+                            class="form-control"
+                            id="city"
+                            name="city"
+                            placeholder="e.g. Bengaluru"
+                            value="{{ request.POST.city|default:'' }}"
+                            required>
+                    </div>
+
+                    <!-- Location Tier -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="location_tier">Location Tier</label>
+                        <select class="form-select" id="location_tier"
+                                name="location_tier" required>
+                            <option value="">Select location tier</option>
+                            <option>Tier 1</option>
+                            <option>Tier 2</option>
+                            <option>Tier 3</option>
+                        </select>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="experience_level">Experience Level</label>
+                        <select class="form-select" id="experience_level"
+                                name="experience_level" required>
+                            <option value="">Select experience</option>
+                            <option>Fresher</option>
+                            <option>Junior</option>
+                            <option>Mid</option>
+                            <option>Senior</option>
+                            <option>Lead</option>
+                        </select>
+                    </div>
+
+                    <!-- Job Type -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="job_type">Job Type</label>
+                        <select class="form-select" id="job_type"
+                                name="job_type" required>
+                            <option value="">Select job type</option>
+                            <option>Full-time</option>
+                            <option>Part-time</option>
+                            <option>Contract</option>
+                            <option>Internship</option>
+                        </select>
+                    </div>
+
+                    <!-- Work Mode -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="work_mode">Work Mode</label>
+                        <select class="form-select" id="work_mode"
+                                name="work_mode" required>
+                            <option value="">Select work mode</option>
+                            <option>On-site</option>
+                            <option>Hybrid</option>
+                            <option>Remote</option>
+                        </select>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="col-md-6">
+                        <label class="form-label" for="education">Education Required</label>
+                        <select class="form-select" id="education"
+                                name="education" required>
+                            <option value="">Select education</option>
+                            <option>Bachelors</option>
+                            <option>Masters</option>
+                            <option>PhD</option>
+                            <option>Diploma</option>
+                            <option>Any Degree</option>
+                        </select>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="col-12">
+                        <label class="form-label" for="skills">Required Skills</label>
+                        <textarea
+                            class="form-control"
+                            id="skills"
+                            name="skills"
+                            rows="3"
+                            placeholder="e.g. Python, Django, SQL, AWS"
+                            required>{{ request.POST.skills|default:'' }}</textarea>
+                        <small class="text-secondary">
+                            Separate skills with commas.
+                        </small>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="col-12 mt-4">
+                        <button type="submit"
+                                class="btn btn-primary btn-lg w-100">
+                            Predict Salary
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dataElement = document.getElementById("guest-prediction-data");
+
+    // Only save predictions for guests.
+    if (!dataElement) {
+        return;
+    }
+
+    try {
+        const prediction = JSON.parse(dataElement.textContent);
+        const storageKey = "salaryscope_guest_history";
+
+        const history = JSON.parse(
+            sessionStorage.getItem(storageKey) || "[]"
+        );
+
+        history.unshift({
+            ...prediction,
+            created_at: new Date().toLocaleString()
+        });
+
+        // Keep the latest 50 guest predictions.
+        sessionStorage.setItem(
+            storageKey,
+            JSON.stringify(history.slice(0, 50))
+        );
+    } catch (error) {
+        console.error("Could not save guest prediction history:", error);
+    }
+});
+</script>
+
+</body>
+</html>

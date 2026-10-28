@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Prediction History | SalaryScope</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+            SalaryScope
+        </a>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'predict' %}" class="btn btn-outline-light btn-sm">
+                New Prediction
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-light btn-sm">
+                Home
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Prediction History</h2>
+
+            {% if is_guest %}
+                <p class="text-muted mb-0">
+                    Temporary history for this browser tab.
+                </p>
+            {% else %}
+                <p class="text-muted mb-0">
+                    Your saved salary predictions.
+                </p>
+            {% endif %}
+        </div>
+
+        {% if is_guest %}
+            <button id="clearHistory"
+                    class="btn btn-outline-danger btn-sm"
+                    type="button">
+                Clear History
+            </button>
+        {% endif %}
+    </div>
+
+    {% if not is_guest %}
+        {% if predictions %}
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Location</th>
+                                <th>Experience</th>
+                                <th>Predicted Salary</th>
+                                <th>Estimated Range</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for prediction in predictions %}
+                                <tr>
+                                    <td class="fw-semibold">
+                                        {{ prediction.job_title }}
+                                    </td>
+                                    <td>{{ prediction.company }}</td>
+                                    <td>{{ prediction.city }}</td>
+                                    <td>{{ prediction.experience_level }}</td>
+
+                                    <td class="text-success fw-bold text-nowrap">
+                                        ₹{{ prediction.predicted_salary|floatformat:2 }} LPA
+                                    </td>
+
+                                    <td>
+                                        {% if prediction.lower_salary != None and prediction.upper_salary != None %}
+                                            ₹{{ prediction.lower_salary|floatformat:2 }}
+                                            – ₹{{ prediction.upper_salary|floatformat:2 }} LPA
+                                            <div class="small text-muted">
+                                                {{ prediction.interval_level }}% estimated interval
+                                            </div>
+                                        {% else %}
+                                            Not available
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-nowrap">
+                                        {{ prediction.created_at|date:"d M Y" }}
+                                        <div class="small text-muted">
+                                            {{ prediction.created_at|date:"h:i A" }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm text-center p-5">
+                <h5 class="fw-bold">No predictions yet</h5>
+                <p class="text-muted">
+                    Your saved predictions will appear here.
+                </p>
+                <div>
+                    <a href="{% url 'predict' %}" class="btn btn-primary">
+                        Make Your First Prediction
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div id="guestHistoryContainer"></div>
+    {% endif %}
+
+</div>
+
+{% if is_guest %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const storageKey = "salaryscope_guest_history";
+    const container = document.getElementById("guestHistoryContainer");
+    const clearButton = document.getElementById("clearHistory");
+
+    function readHistory() {
+        try {
+            const data = JSON.parse(sessionStorage.getItem(storageKey) || "[]");
+            return Array.isArray(data) ? data : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value ?? "";
+        row.appendChild(cell);
+    }
+
+    function renderHistory() {
+        const history = readHistory();
+        container.replaceChildren();
+
+        if (history.length === 0) {
+            const card = document.createElement("div");
+            card.className = "card border-0 shadow-sm text-center p-5";
+
+            const heading = document.createElement("h5");
+            heading.className = "fw-bold";
+            heading.textContent = "No temporary predictions yet";
+
+            const description = document.createElement("p");
+            description.className = "text-muted";
+            description.textContent =
+                "Make a salary prediction and it will appear here during this tab's session.";
+
+            const link = document.createElement("a");
+            link.href = "{% url 'predict' %}";
+            link.className = "btn btn-primary align-self-center";
+            link.textContent = "Predict Salary";
+
+            card.append(heading, description, link);
+            container.appendChild(card);
+            return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "card border-0 shadow-sm";
+
+        const responsive = document.createElement("div");
+        responsive.className = "table-responsive";
+
+        const table = document.createElement("table");
+        table.className = "table table-hover align-middle mb-0";
+
+        const thead = document.createElement("thead");
+        thead.className = "table-dark";
+
+        const headerRow = document.createElement("tr");
+        [
+            "Job Title", "Company", "Location", "Experience",
+            "Predicted Salary", "Estimated Range", "Date"
+        ].forEach(function (heading) {
+            const th = document.createElement("th");
+            th.textContent = heading;
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+
+        const tbody = document.createElement("tbody");
+
+        history.forEach(function (prediction) {
+            const row = document.createElement("tr");
+
+            addCell(row, prediction.job_title);
+            addCell(row, prediction.company);
+            addCell(row, prediction.city);
+            addCell(row, prediction.experience_level);
+            addCell(row, "₹" + Number(prediction.predicted_salary).toFixed(2) + " LPA");
+
+            let range = "Not available";
+            if (prediction.lower_salary != null && prediction.upper_salary != null) {
+                range = "₹" + Number(prediction.lower_salary).toFixed(2)
+                    + " – ₹" + Number(prediction.upper_salary).toFixed(2) + " LPA";
+            }
+            addCell(row, range);
+            addCell(row, prediction.created_at || "");
+
+            tbody.appendChild(row);
+        });
+
+        table.append(thead, tbody);
+        responsive.appendChild(table);
+        card.appendChild(responsive);
+        container.appendChild(card);
+    }
+
+    clearButton.addEventListener("click", function () {
+        if (confirm("Clear all temporary predictions from this tab?")) {
+            sessionStorage.removeItem(storageKey);
+            renderHistory();
+        }
+    });
+
+    renderHistory();
+});
+</script>
+{% endif %}
+
+</body>
+</html>

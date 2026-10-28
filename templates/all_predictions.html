@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Predictions | SalaryScope</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f7fb;
+            color: #172033;
+            font-family: Arial, sans-serif;
+        }
+        .navbar { background: #14213d; }
+        .section-card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, .05);
+        }
+        .page-title { color: #173d73; }
+        .table th { white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark">
+    <div class="container-fluid px-4">
+        <a href="{% url 'admin_dashboard' %}" class="navbar-brand fw-bold">
+            SalaryScope Admin
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_dashboard' %}"
+               class="btn btn-outline-light btn-sm">Dashboard</a>
+            <a href="{% url 'home' %}" class="btn btn-light btn-sm">
+                Main Website
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold page-title">All Predictions</h2>
+            <p class="text-secondary mb-0">
+                Search and review saved salary predictions.
+            </p>
+        </div>
+        <div class="bg-white rounded-3 shadow-sm px-4 py-3">
+            <span class="text-secondary">Matching Records</span>
+            <div class="fs-3 fw-bold">{{ total_predictions }}</div>
+        </div>
+    </div>
+
+    <div class="card section-card mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3">
+                <div class="col-lg-5">
+                    <label for="q" class="form-label">Search predictions</label>
+                    <input type="text" id="q" name="q" class="form-control"
+                           value="{{ search_query }}"
+                           placeholder="Username, job title, company, or city">
+                </div>
+                <div class="col-md-4 col-lg-2">
+                    <label for="date_from" class="form-label">From date</label>
+                    <input type="date" id="date_from" name="date_from"
+                           class="form-control" value="{{ date_from }}">
+                </div>
+                <div class="col-md-4 col-lg-2">
+                    <label for="date_to" class="form-label">To date</label>
+                    <input type="date" id="date_to" name="date_to"
+                           class="form-control" value="{{ date_to }}">
+                </div>
+                <div class="col-md-4 col-lg-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a href="{% url 'all_predictions' %}"
+                       class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card section-card">
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>City</th>
+                            <th>Experience</th>
+                            <th>Predicted Salary</th>
+                            <th>Estimated Range</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prediction in predictions %}
+                        <tr>
+                            <td>{{ prediction.user.username }}</td>
+                            <td class="fw-semibold">{{ prediction.job_title }}</td>
+                            <td>{{ prediction.company }}</td>
+                            <td>{{ prediction.city }}</td>
+                            <td>{{ prediction.experience_level }}</td>
+                            <td class="text-success fw-bold text-nowrap">
+                                ₹{{ prediction.predicted_salary|floatformat:2 }} LPA
+                            </td>
+                            <td class="text-nowrap">
+                                {% if prediction.lower_salary != None and prediction.upper_salary != None %}
+                                    ₹{{ prediction.lower_salary|floatformat:2 }} –
+                                    ₹{{ prediction.upper_salary|floatformat:2 }} LPA
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td class="text-nowrap">
+                                {{ prediction.created_at|date:"d M Y, h:i A" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <h6 class="fw-bold">No predictions found</h6>
+                                <p class="text-secondary mb-0">
+                                    Try another search term or date range.
+                                </p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-secondary py-4">
+        <small>SalaryScope | System Administration</small>
+    </footer>
+</main>
+
+</body>
+</html>
