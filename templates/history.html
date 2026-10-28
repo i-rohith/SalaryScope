@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,11 +10,306 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
+
+    <style>
+        :root {
+            --bg-color: #eef1f5;
+            --surface-color: #eef1f5;
+            --text-color: #303846;
+            --muted-color: #7b8493;
+            --primary-color: #5278e8;
+            --success-color: #218765;
+            --danger-color: #d95364;
+
+            --shadow-raised:
+                7px 7px 16px #d1d5dc,
+                -7px -7px 16px #ffffff;
+
+            --shadow-raised-small:
+                4px 4px 9px #d1d5dc,
+                -4px -4px 9px #ffffff;
+
+            --shadow-inset:
+                inset 4px 4px 8px #d1d5dc,
+                inset -4px -4px 8px #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--surface-color) !important;
+            padding: 18px 0;
+            box-shadow: 0 4px 12px rgba(50, 60, 80, 0.05);
+        }
+
+        .navbar-brand {
+            color: var(--text-color) !important;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            padding: 9px 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 8px 13px;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            box-shadow: 3px 3px 7px rgba(82, 120, 232, 0.2);
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background: #4268d5;
+            border-color: #4268d5;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-light {
+            color: var(--text-color);
+            background: var(--surface-color);
+            border: none;
+            box-shadow: var(--shadow-raised-small);
+        }
+
+        .btn-outline-light:hover {
+            color: var(--primary-color);
+            background: var(--surface-color);
+            border: none;
+            box-shadow: var(--shadow-inset);
+        }
+
+        .btn-light {
+            color: var(--text-color);
+            background: var(--surface-color);
+            border: none;
+            box-shadow: var(--shadow-raised-small);
+        }
+
+        .btn-light:hover {
+            color: var(--primary-color);
+            background: var(--surface-color);
+            box-shadow: var(--shadow-inset);
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border: 1px solid rgba(217, 83, 100, 0.3);
+            background: var(--surface-color);
+            box-shadow: var(--shadow-raised-small);
+        }
+
+        .btn-outline-danger:hover {
+            color: #fff;
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        /* Page heading */
+        .page-title {
+            font-size: clamp(1.7rem, 3vw, 2.15rem);
+            font-weight: 750;
+            letter-spacing: -0.8px;
+            color: var(--text-color);
+        }
+
+        .page-description {
+            color: var(--muted-color);
+            font-size: 0.96rem;
+        }
+
+        /* Neumorphic cards */
+        .history-card {
+            background: var(--surface-color);
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--shadow-raised);
+            overflow: hidden;
+        }
+
+        .empty-card {
+            padding: 55px 24px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            background: var(--surface-color);
+            box-shadow: var(--shadow-raised);
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .empty-card h5 {
+            font-weight: 750;
+            margin-bottom: 10px;
+        }
+
+        .empty-card p {
+            color: var(--muted-color);
+            margin-bottom: 24px;
+        }
+
+        /* Table */
+        .table-responsive {
+            border-radius: 20px;
+        }
+
+        .history-table {
+            margin-bottom: 0;
+            color: var(--text-color);
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 950px;
+        }
+
+        .history-table thead th {
+            background: #e4e8ef;
+            color: #525d70;
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0.45px;
+            text-transform: uppercase;
+            padding: 19px 18px;
+            border-bottom: 1px solid #dce1e9;
+            white-space: nowrap;
+        }
+
+        .history-table tbody td {
+            background: var(--surface-color);
+            color: var(--text-color);
+            padding: 19px 18px;
+            border-bottom: 1px solid #e0e4eb;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table.table-hover > tbody > tr:hover > * {
+            background: #e9edf4;
+            color: var(--text-color);
+        }
+
+        .job-title {
+            font-weight: 700;
+            color: #303846;
+        }
+
+        .salary-value {
+            color: var(--success-color) !important;
+            font-weight: 750;
+            white-space: nowrap;
+        }
+
+        .salary-range {
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .date-value {
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .small.text-muted {
+            color: var(--muted-color) !important;
+            font-size: 0.78rem;
+            margin-top: 4px;
+        }
+
+        /* Guest history table */
+        #guestHistoryContainer .history-card {
+            margin-bottom: 20px;
+        }
+
+        /* Responsive layout */
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 14px 0;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar .container {
+                gap: 12px;
+            }
+
+            .navbar .d-flex {
+                gap: 8px !important;
+            }
+
+            .navbar .btn-sm {
+                padding: 7px 10px;
+                font-size: 0.78rem;
+            }
+
+            .page-title {
+                font-size: 1.65rem;
+            }
+
+            .history-card {
+                border-radius: 16px;
+            }
+
+            .empty-card {
+                padding: 40px 18px;
+            }
+
+            .container.py-5 {
+                padding-top: 2.2rem !important;
+                padding-bottom: 2.2rem !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-<nav class="navbar navbar-dark bg-dark">
+<nav class="navbar">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{% url 'home' %}">
             SalaryScope
@@ -36,14 +330,14 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Prediction History</h2>
+            <h2 class="page-title mb-2">Prediction History</h2>
 
             {% if is_guest %}
-                <p class="text-muted mb-0">
+                <p class="page-description mb-0">
                     Temporary history for this browser tab.
                 </p>
             {% else %}
-                <p class="text-muted mb-0">
+                <p class="page-description mb-0">
                     Your saved salary predictions.
                 </p>
             {% endif %}
@@ -60,10 +354,10 @@
 
     {% if not is_guest %}
         {% if predictions %}
-            <div class="card border-0 shadow-sm">
+            <div class="history-card">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-dark">
+                    <table class="table table-hover align-middle history-table">
+                        <thead>
                             <tr>
                                 <th>Job Title</th>
                                 <th>Company</th>
@@ -78,30 +372,33 @@
                         <tbody>
                             {% for prediction in predictions %}
                                 <tr>
-                                    <td class="fw-semibold">
+                                    <td class="job-title">
                                         {{ prediction.job_title }}
                                     </td>
+
                                     <td>{{ prediction.company }}</td>
                                     <td>{{ prediction.city }}</td>
                                     <td>{{ prediction.experience_level }}</td>
 
-                                    <td class="text-success fw-bold text-nowrap">
+                                    <td class="salary-value">
                                         ₹{{ prediction.predicted_salary|floatformat:2 }} LPA
                                     </td>
 
                                     <td>
                                         {% if prediction.lower_salary != None and prediction.upper_salary != None %}
-                                            ₹{{ prediction.lower_salary|floatformat:2 }}
-                                            – ₹{{ prediction.upper_salary|floatformat:2 }} LPA
+                                            <div class="salary-range">
+                                                ₹{{ prediction.lower_salary|floatformat:2 }}
+                                                – ₹{{ prediction.upper_salary|floatformat:2 }} LPA
+                                            </div>
                                             <div class="small text-muted">
                                                 {{ prediction.interval_level }}% estimated interval
                                             </div>
                                         {% else %}
-                                            Not available
+                                            <span class="text-muted">Not available</span>
                                         {% endif %}
                                     </td>
 
-                                    <td class="text-nowrap">
+                                    <td class="date-value">
                                         {{ prediction.created_at|date:"d M Y" }}
                                         <div class="small text-muted">
                                             {{ prediction.created_at|date:"h:i A" }}
@@ -114,11 +411,10 @@
                 </div>
             </div>
         {% else %}
-            <div class="card border-0 shadow-sm text-center p-5">
-                <h5 class="fw-bold">No predictions yet</h5>
-                <p class="text-muted">
-                    Your saved predictions will appear here.
-                </p>
+            <div class="history-card empty-card">
+                <div class="empty-icon" aria-hidden="true">↗</div>
+                <h5>No predictions yet</h5>
+                <p>Your saved predictions will appear here.</p>
                 <div>
                     <a href="{% url 'predict' %}" class="btn btn-primary">
                         Make Your First Prediction
@@ -148,10 +444,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function addCell(row, value) {
+    function addCell(row, value, className = "") {
         const cell = document.createElement("td");
         cell.textContent = value ?? "";
+
+        if (className) {
+            cell.className = className;
+        }
+
         row.appendChild(cell);
+        return cell;
     }
 
     function renderHistory() {
@@ -160,40 +462,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (history.length === 0) {
             const card = document.createElement("div");
-            card.className = "card border-0 shadow-sm text-center p-5";
+            card.className = "history-card empty-card";
+
+            const icon = document.createElement("div");
+            icon.className = "empty-icon";
+            icon.setAttribute("aria-hidden", "true");
+            icon.textContent = "↗";
 
             const heading = document.createElement("h5");
-            heading.className = "fw-bold";
             heading.textContent = "No temporary predictions yet";
 
             const description = document.createElement("p");
-            description.className = "text-muted";
             description.textContent =
                 "Make a salary prediction and it will appear here during this tab's session.";
 
             const link = document.createElement("a");
             link.href = "{% url 'predict' %}";
-            link.className = "btn btn-primary align-self-center";
+            link.className = "btn btn-primary";
             link.textContent = "Predict Salary";
 
-            card.append(heading, description, link);
+            card.append(icon, heading, description, link);
             container.appendChild(card);
             return;
         }
 
         const card = document.createElement("div");
-        card.className = "card border-0 shadow-sm";
+        card.className = "history-card";
 
         const responsive = document.createElement("div");
         responsive.className = "table-responsive";
 
         const table = document.createElement("table");
-        table.className = "table table-hover align-middle mb-0";
+        table.className = "table table-hover align-middle history-table";
 
         const thead = document.createElement("thead");
-        thead.className = "table-dark";
-
         const headerRow = document.createElement("tr");
+
         [
             "Job Title", "Company", "Location", "Experience",
             "Predicted Salary", "Estimated Range", "Date"
@@ -210,19 +514,30 @@ document.addEventListener("DOMContentLoaded", function () {
         history.forEach(function (prediction) {
             const row = document.createElement("tr");
 
-            addCell(row, prediction.job_title);
+            addCell(row, prediction.job_title, "job-title");
             addCell(row, prediction.company);
             addCell(row, prediction.city);
             addCell(row, prediction.experience_level);
-            addCell(row, "₹" + Number(prediction.predicted_salary).toFixed(2) + " LPA");
+
+            addCell(
+                row,
+                "₹" + Number(prediction.predicted_salary).toFixed(2) + " LPA",
+                "salary-value"
+            );
 
             let range = "Not available";
-            if (prediction.lower_salary != null && prediction.upper_salary != null) {
+
+            if (
+                prediction.lower_salary != null &&
+                prediction.upper_salary != null
+            ) {
                 range = "₹" + Number(prediction.lower_salary).toFixed(2)
-                    + " – ₹" + Number(prediction.upper_salary).toFixed(2) + " LPA";
+                    + " – ₹" + Number(prediction.upper_salary).toFixed(2)
+                    + " LPA";
             }
-            addCell(row, range);
-            addCell(row, prediction.created_at || "");
+
+            addCell(row, range, "salary-range");
+            addCell(row, prediction.created_at || "", "date-value");
 
             tbody.appendChild(row);
         });
@@ -233,12 +548,14 @@ document.addEventListener("DOMContentLoaded", function () {
         container.appendChild(card);
     }
 
-    clearButton.addEventListener("click", function () {
-        if (confirm("Clear all temporary predictions from this tab?")) {
-            sessionStorage.removeItem(storageKey);
-            renderHistory();
-        }
-    });
+    if (clearButton) {
+        clearButton.addEventListener("click", function () {
+            if (confirm("Clear all temporary predictions from this tab?")) {
+                sessionStorage.removeItem(storageKey);
+                renderHistory();
+            }
+        });
+    }
 
     renderHistory();
 });
